@@ -2,3 +2,4 @@ name = CWS Aggregator
 description = This module extends Drupal Aggregator to auto deploy feed actions with elysia cron.
 core = 7.x
 package = CWS
+dependencies[] = {other}:{elysia_cron}
