@@ -1,0 +1,13 @@
+<?php
+
+function cws_aggregator_clean_feeds()
+{
+  //we will test our first feed using a static feed Id of 1.
+  $feedToDelete = 1;
+
+  //run query to remove all rows in the aggregator table database.
+  db_delete('aggregator_item')
+    ->condition('fid', $feedToDelete)
+    ->execute();
+}
+
