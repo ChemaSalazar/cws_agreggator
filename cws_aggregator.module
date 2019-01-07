@@ -1,5 +1,5 @@
 <?php
-
+/*
 function cws_aggregator_clean_feeds()
 {
   //we will test our first feed using a static feed Id of 1.
@@ -9,5 +9,9 @@ function cws_aggregator_clean_feeds()
   db_delete('aggregator_item')
     ->condition('fid', $feedToDelete)
     ->execute();
-}
+}*/
 
+function cws_aggregator_aggregator_remove($feed){
+  $feedToDelete = 1;
+  cws_aggregator_remove_items($feed->$feedToDelete);
+}
