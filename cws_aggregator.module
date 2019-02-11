@@ -1,25 +1,55 @@
 <?php
 
+/*
+  Tables associated with aggregator:
+
+    aggregator_category
+    aggregator_category_feed
+    aggregator_category_item
+    aggregator_feed
+    aggregator_item
+
+*/
+
 function cws_aggregator_cron(){
 
+  //get the totol number of rows in the aggregator_feed table.
   $total_feeds = db_query("SELECT COUNT(fid) FROM aggregator_feed")->fetchField();
+
+  //create an array that will handle multiple values using the $total_feeds value, this will store each feed's unique fid.
+  $db_feed_id = array();
+
 
   for($init_counter=1; $init_counter <= $total_feeds; $init_counter++){
 
+    //Prepare statements for query.
+    if $init_counter == 1
+    {
+      //Get fid from only the first row
+      $built_query = "SELECT fid FROM aggregator_feed LIMIT " + $init_counter;
+    }
+    else {
+      //Get fid from only the current $init_counter row number, offset by it's own number to isolate multiple values.
+      $built_query = "SELECT fid FROM aggregator_feed LIMIT " + $init_counter + "," + $init_counter;
+    }
+
+    //load the fid value to the current array index.
+    $db_feed_id[$init_counter] = db_query($built_query)->fetchField();
+
     //empty the first feed argument is fid.
-    $loaded_feed = aggregator_feed_load($init_counter);
+    $loaded_feed = aggregator_feed_load($db_feed_id);
     aggregator_remove($loaded_feed);
 
     //log on recent log messages
     watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed->title));
 
     //load the an empty feed using aggregator_feed_load
-    $empty_feed = aggregator_feed_load($init_counter);
+    $empty_feed = aggregator_feed_load($db_feed_id);
     $empty_feed->source_string = "empty";
     //run update with the empty feed to fill it up
     aggregator_refresh($empty_feed);
 
-    $filled_feed = aggregator_feed_load($init_counter);
+    $filled_feed = aggregator_feed_load($db_feed_id);
     //log on recent log messages
     watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed->title));
 
