@@ -43,6 +43,7 @@ switch ($fnum) {
     $empty_feed1->source_string = "empty";
     //run update with the empty feeds to fill it up
     aggregator_refresh($empty_feed1);
+    $filled_feed1 = aggregator_feed_load($feed1);
     //log on recent log messages
     watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed1->title));
     break;
@@ -65,6 +66,9 @@ switch ($fnum) {
     //run update with the empty feeds to fill it up
     aggregator_refresh($empty_feed1);
     aggregator_refresh($empty_feed2);
+
+    $filled_feed1 = aggregator_feed_load($feed1);
+    $filled_feed2 = aggregator_feed_load($feed2);
     //log on recent log messages
     watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed1->title));
     watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed2->title));
@@ -94,6 +98,11 @@ switch ($fnum) {
     aggregator_refresh($empty_feed1);
     aggregator_refresh($empty_feed2);
     aggregator_refresh($empty_feed3);
+
+    $filled_feed1 = aggregator_feed_load($feed1);
+    $filled_feed2 = aggregator_feed_load($feed2);
+    $filled_feed3 = aggregator_feed_load($feed3);
+
     //log on recent log messages
     watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed1->title));
     watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed2->title));
