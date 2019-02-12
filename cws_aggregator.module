@@ -19,12 +19,12 @@ function cws_aggregator_cron(){
   $feed2 = db_query("SELECT fid FROM aggregator_feed LIMIT 1, 1")->fetchField();
   $feed3 = db_query("SELECT fid FROM aggregator_feed LIMIT 2, 2")->fetchField();
 
-  feedsToRun($total_feeds);
+  feedsToRun($total_feeds, $feed1, $feed2, $feed3);
 
 }
 
 
-function feedsToRun($fnum){
+function feedsToRun($fnum, $feed1, $feed2, $feed3){
 
 switch ($fnum) {
   case 0:
