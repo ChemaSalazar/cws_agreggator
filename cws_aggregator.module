@@ -19,11 +19,9 @@ function cws_aggregator_cron(){
   $feed2 = db_query("SELECT fid FROM aggregator_feed LIMIT 1, 1")->fetchField();
   $feed3 = db_query("SELECT fid FROM aggregator_feed LIMIT 2, 2")->fetchField();
 
-  for ($frun=1; $frun <= 2; $frun++)
-  {
-    //testing cron passes
+
     feedsToRun($total_feeds, $feed1, $feed2, $feed3);
-  }
+
 }
 
 
