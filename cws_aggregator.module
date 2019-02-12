@@ -14,7 +14,7 @@
 function cws_aggregator_cron(){
 
   //get the totol number of rows in the aggregator_feed table.
-  $total_feeds = db_query("SELECT COUNT(fid) FROM aggregator_feed")->fetchField();
+  $total_feeds = db_query("SELECT COUNT(fid) FROM `aggregator_feed`")->fetchField();
 
   //create an array that will handle multiple values using the $total_feeds value, this will store each feed's unique fid.
   $db_feed_id = array();
@@ -26,11 +26,11 @@ function cws_aggregator_cron(){
     if ($init_counter == 1)
     {
       //Get fid from only the first row
-      $built_query = "SELECT fid FROM aggregator_feed LIMIT " + $init_counter;
+      $built_query = "SELECT `fid` FROM `aggregator_feed` LIMIT " + $init_counter;
     }
     else {
       //Get fid from only the current $init_counter row number, offset by it's own number to isolate multiple values.
-      $built_query = "SELECT fid FROM aggregator_feed LIMIT " + $init_counter + "," + $init_counter;
+      $built_query = "SELECT `fid` FROM `aggregator_feed` LIMIT " + $init_counter + "," + $init_counter;
     }
 
     //load the fid value to the current array index.
@@ -54,7 +54,7 @@ function cws_aggregator_cron(){
     watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed->title));
 
     //reset the strings.
-    $built_query = null;
+    $built_query = NULL;
   }
 
   //unset variables from memory
