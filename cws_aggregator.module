@@ -20,7 +20,12 @@ function cws_aggregator_cron(){
   $db_feed_id = array();
 
 
+
+
   for($init_counter=1; $init_counter <= $total_feeds; $init_counter++){
+
+    //bind LIMIT values to $built_query
+    $built_query->bindValue('$init_counter', PDO:PARAM_INT);
 
     //Prepare statements for query.
     if ($init_counter == 1)
