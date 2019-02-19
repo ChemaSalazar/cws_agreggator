@@ -21,9 +21,9 @@ function cws_aggregator_cron(){
   $feed3 = db_query("SELECT fid FROM aggregator_feed LIMIT 2, 2")->fetchField();
 
   //begin updating or constructing from feed data.
-  //resetFeeds($feed1, $feed2, $feed3);
-  feedsToRun($total_feeds, $feed1, $feed2, $feed3);
   resetFeeds($feed1, $feed2, $feed3);
+  feedsToRun($total_feeds, $feed1, $feed2, $feed3);
+
 }
 
 
