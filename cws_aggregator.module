@@ -36,7 +36,7 @@ function resetFeeds($feed1, $feed2, $feed3){
    'hash' => 'safdh',
    'etag' => '',
    'modified' => 0,
- ));
+ ))
  ->execute();
 
  db_update('aggregator_feed')
@@ -46,7 +46,7 @@ function resetFeeds($feed1, $feed2, $feed3){
   'hash' => 'q3rtj',
   'etag' => '',
   'modified' => 0,
-));
+))
 ->execute();
 
 db_update('aggregator_feed')
@@ -56,7 +56,7 @@ db_update('aggregator_feed')
  'hash' => '2434teytfj',
  'etag' => '',
  'modified' => 0,
-));
+))
 ->execute();
 
   watchdog('cws_aggregator @ resetFeeds', 'Feeds have been reset!');
