@@ -10,7 +10,7 @@ first check the number of feeds it finds on the website's database and then pass
 to make sure that it do any more or any less work.
 
 */
-
+/*
 function cws_aggregator_cron(){
 
     //build queries and fetch individual values.
@@ -39,7 +39,7 @@ function cws_aggregator_cron(){
     //feedsToRun($total_feeds, $feed1, $feed2, $feed3);
 
 }
-
+*/
 
 
 function cws_delete_feeds(){
