@@ -10,7 +10,7 @@ first check the number of feeds it finds on the website's database and then pass
 to make sure that it do any more or any less work.
 
 */
-
+/*
 function cws_aggregator_cron(){
 
     //build queries and fetch individual values.
@@ -25,12 +25,48 @@ function cws_aggregator_cron(){
     watchdog('feed2', 'fid = %feed2', array('%feed2'=> $feed2));
     watchdog('feed3', 'fid = %feed3', array('%feed3'=> $feed3));
 
+    //delete all three feed contents
+    cws_delete_feed($feed1);
+    cws_delete_feed($feed2);
+    cws_delete_feed($feed3);
+    cws_update_feed($feed1);
+    cws_update_feed($feed2);
+    cws_update_feed($feed3);
+
+
+
     //begin updating or constructing from feed data.
-    feedsToRun($total_feeds, $feed1, $feed2, $feed3);
+    //feedsToRun($total_feeds, $feed1, $feed2, $feed3);
 
 }
 
+*/
 
+function cws_delete_feeds(){
+    $feed1 = db_query("SELECT fid FROM aggregator_feed LIMIT 0, 1")->fetchField();
+    $feed2 = db_query("SELECT fid FROM aggregator_feed LIMIT 1, 1")->fetchField();
+    $feed3 = db_query("SELECT fid FROM aggregator_feed LIMIT 2, 2")->fetchField();
+    aggregator_remove($feed1);
+    aggregator_remove($feed2);
+    aggregator_remove($feed3);
+    watchdog('cws_delete_feed', 'feed with fid = %my_feed has been emptied', array('%my_feed'=> $feed1));
+    watchdog('cws_delete_feed', 'feed with fid = %my_feed has been emptied', array('%my_feed'=> $feed2));
+    watchdog('cws_delete_feed', 'feed with fid = %my_feed has been emptied', array('%my_feed'=> $feed3));
+}
+
+function cws_update_feeds(){
+    $feed1 = db_query("SELECT fid FROM aggregator_feed LIMIT 0, 1")->fetchField();
+    $feed2 = db_query("SELECT fid FROM aggregator_feed LIMIT 1, 1")->fetchField();
+    $feed3 = db_query("SELECT fid FROM aggregator_feed LIMIT 2, 2")->fetchField();
+    aggregator_refresh($feed1);
+    aggregator_refresh($feed2);
+    aggregator_refresh($feed3);
+    watchdog('cws_update_feed', 'feed with fid = %my_feed has been filled', array('%my_feed'=> $feed1));
+    watchdog('cws_update_feed', 'feed with fid = %my_feed has been filled', array('%my_feed'=> $feed2));
+    watchdog('cws_update_feed', 'feed with fid = %my_feed has been filled', array('%my_feed'=> $feed3));
+}
+
+/*
 function feedsToRun($fnum, $feed1, $feed2, $feed3){
 
 switch ($fnum) {
@@ -140,3 +176,4 @@ switch ($fnum) {
   } //END of Switch
 
 } //END of feedsToRun
+*/
