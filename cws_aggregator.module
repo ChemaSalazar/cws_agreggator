@@ -10,7 +10,7 @@ first check the number of feeds it finds on the website's database and then pass
 to make sure that it do any more or any less work.
 
 */
-/*
+
 function cws_aggregator_cron(){
 
     //build queries and fetch individual values.
@@ -40,7 +40,7 @@ function cws_aggregator_cron(){
 
 }
 
-*/
+
 
 function cws_delete_feeds(){
     $feed1 = db_query("SELECT fid FROM aggregator_feed LIMIT 0, 1")->fetchField();
@@ -64,6 +64,11 @@ function cws_update_feeds(){
     $feedobj1 = aggregator_feed_load($feed1);
     $feedobj2 = aggregator_feed_load($feed2);
     $feedobj3 = aggregator_feed_load($feed3);
+
+    $feedobj1->source_string = "temp";
+    $feedobj2->source_string = "temp";
+    $feedobj3->source_string = "temp";
+
     aggregator_refresh($feedobj1);
     aggregator_refresh($feedobj2);
     aggregator_refresh($feedobj3);
