@@ -3,188 +3,77 @@
 /*
 cws_aggregator_cron invokes the hook_cron task.
 
-This is a very custom module designed to work with UNTDallas specific aggregator feeds.
-The assumption is that there are ONLY 3 aggregator feeds per website AND the first 3 feeds
-created on the sites are the UNT calendar, news, and featured news feeds. This code will
-first check the number of feeds it finds on the website's database and then pass it through feedsToRun($fnum)
-to make sure that it do any more or any less work.
+This is a custom module designed to work with aggregator feeds. This code will
+first check the number of feeds it finds on the website's database and then pass
+it through a loop that runs per number of feeds found.
+
+We then automate the deletion of the table data, and prepare it for update.
+Finally we refresh the feed.
+
+Configure with cron to run as often as you desire.
 
 */
+
+
 /*
+  Tables associated with aggregator:
+
+    aggregator_category
+    aggregator_category_feed
+    aggregator_category_item
+    aggregator_feed
+    aggregator_item
+
+*/
+
 function cws_aggregator_cron(){
 
-    //build queries and fetch individual values.
-    $total_feeds = db_query("SELECT COUNT(fid) FROM aggregator_feed")->fetchField();
+  $total_feeds = db_query("SELECT COUNT(fid) FROM aggregator_feed")->fetchField();
 
-    $feed1 = db_query("SELECT fid FROM aggregator_feed LIMIT 0, 1")->fetchField();
-    $feed2 = db_query("SELECT fid FROM aggregator_feed LIMIT 1, 1")->fetchField();
-    $feed3 = db_query("SELECT fid FROM aggregator_feed LIMIT 2, 2")->fetchField();
+  for($init_counter=1; $init_counter <= $total_feeds; $init_counter++){
 
-    //log values
-    watchdog('feed1', 'fid = %feed1', array('%feed1'=> $feed1));
-    watchdog('feed2', 'fid = %feed2', array('%feed2'=> $feed2));
-    watchdog('feed3', 'fid = %feed3', array('%feed3'=> $feed3));
+    if($init_counter == 1){
+    $query_string = db_select("SELECT fid FROM aggregator_feed")
+    ->range(0,1)
+    ->execute();
 
-    //delete all three feed contents
-    cws_delete_feed($feed1);
-    cws_delete_feed($feed2);
-    cws_delete_feed($feed3);
-    cws_update_feed($feed1);
-    cws_update_feed($feed2);
-    cws_update_feed($feed3);
-
-
-
-    //begin updating or constructing from feed data.
-    //feedsToRun($total_feeds, $feed1, $feed2, $feed3);
-
-}
-*/
-
-
-function cws_delete_feeds(){
-    $feed1 = db_query("SELECT fid FROM aggregator_feed LIMIT 0, 1")->fetchField();
-    $feed2 = db_query("SELECT fid FROM aggregator_feed LIMIT 1, 1")->fetchField();
-    $feed3 = db_query("SELECT fid FROM aggregator_feed LIMIT 2, 2")->fetchField();
-    $feedobj1 = aggregator_feed_load($feed1);
-    $feedobj2 = aggregator_feed_load($feed2);
-    $feedobj3 = aggregator_feed_load($feed3);
-    aggregator_remove($feedobj1);
-    aggregator_remove($feedobj2);
-    aggregator_remove($feedobj3);
-    watchdog('cws_delete_feed', 'feed with fid = %my_feed has been emptied', array('%my_feed'=> $feed1));
-    watchdog('cws_delete_feed', 'feed with fid = %my_feed has been emptied', array('%my_feed'=> $feed2));
-    watchdog('cws_delete_feed', 'feed with fid = %my_feed has been emptied', array('%my_feed'=> $feed3));
-}
-
-function cws_update_feeds(){
-    $feed1 = db_query("SELECT fid FROM aggregator_feed LIMIT 0, 1")->fetchField();
-    $feed2 = db_query("SELECT fid FROM aggregator_feed LIMIT 1, 1")->fetchField();
-    $feed3 = db_query("SELECT fid FROM aggregator_feed LIMIT 2, 2")->fetchField();
-    $feedobj1 = aggregator_feed_load($feed1);
-    $feedobj2 = aggregator_feed_load($feed2);
-    $feedobj3 = aggregator_feed_load($feed3);
-
-    $feedobj1->source_string = "temp";
-    $feedobj2->source_string = "temp";
-    $feedobj3->source_string = "temp";
-
-    aggregator_refresh($feedobj1);
-    aggregator_refresh($feedobj2);
-    aggregator_refresh($feedobj3);
-    watchdog('cws_update_feed', 'feed with fid = %my_feed has been filled', array('%my_feed'=> $feed1));
-    watchdog('cws_update_feed', 'feed with fid = %my_feed has been filled', array('%my_feed'=> $feed2));
-    watchdog('cws_update_feed', 'feed with fid = %my_feed has been filled', array('%my_feed'=> $feed3));
-}
-
-/*
-function feedsToRun($fnum, $feed1, $feed2, $feed3){
-
-switch ($fnum) {
-
-  //THERE ARE NO FEEDS
-  case 0:
-    watchdog('cws_aggregator', 'There are no aggregator feeds set up on this website!');
-    break;
-
-  //THERE IS ONLY ONE FEED.
-  case 1:
-    watchdog('cws_aggregator', 'Found a single aggregator feed on this site!');
-    //empty feed
-    $loaded_feed1 = aggregator_feed_load($feed1);
-
-    aggregator_remove($loaded_feed1);
-    //log on recent log messages
-    watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed1->title));
-    //load the an empty feeds using aggregator_feed_load
-    $empty_feed1 = aggregator_feed_load($feed1);
-    $empty_feed1->source_string = "temp";
-    //run update with the empty feeds to fill it up
-    aggregator_refresh($empty_feed1);
-    $filled_feed1 = aggregator_feed_load($feed1);
-    //log on recent log messages
-    watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed1->title));
-    break;
-
-  //THERE ARE TWO FEEDS
-  case 2:
-    watchdog('cws_aggregator', 'Found 2 aggregator feeds on this site!');
-    //empty feeds
-    $loaded_feed1 = aggregator_feed_load($feed1);
-    $loaded_feed2 = aggregator_feed_load($feed2);
-
-    //remove feed data if it was not empty.
-    aggregator_remove($loaded_feed1);
-    aggregator_remove($loaded_feed2);
-
-    //log feed that was emptied
-    watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed1->title));
-    watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed2->title));
-
-    //load the an empty feeds using aggregator_feed_load
-    $empty_feed1 = aggregator_feed_load($feed1);
-    $empty_feed1->source_string = "temp";
-    $empty_feed2 = aggregator_feed_load($feed2);
-    $empty_feed2->source_string = "temp";
-
-    //run update with the empty feeds to fill it up
-    aggregator_refresh($empty_feed1);
-    aggregator_refresh($empty_feed2);
-
-    $filled_feed1 = aggregator_feed_load($feed1);
-    $filled_feed2 = aggregator_feed_load($feed2);
-    //log which feeds got filled.
-    watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed1->title));
-    watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed2->title));
-      break;
-
-  //THERE ARE THREE FEEDS
-  case 3:
-    watchdog('cws_aggregator', 'Found 3 aggregator feeds on this site!');
-    //empty feeds
-    $loaded_feed1 = aggregator_feed_load($feed1);
-    $loaded_feed2 = aggregator_feed_load($feed2);
-    $loaded_feed3 = aggregator_feed_load($feed3);
-
-    aggregator_remove($loaded_feed1);
-    aggregator_remove($loaded_feed2);
-    aggregator_remove($loaded_feed3);
+    //empty the first feed argument is fid.
+    $loaded_feed = aggregator_feed_load($query_string);
+    aggregator_remove($loaded_feed);
 
     //log on recent log messages
-    watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed1->title));
-    watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed2->title));
-    watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed3->title));
+    watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed->title));
 
-    //load the an empty feeds using aggregator_feed_load
-    //$empty_feed1->source_string = "temp";
-    $empty_feed1 = aggregator_feed_load($feed1);
-    $empty_feed1->source_string = "temp";
-    $empty_feed2 = aggregator_feed_load($feed2);
-    $empty_feed2->source_string = "temp";
-    $empty_feed3 = aggregator_feed_load($feed3);
-    $empty_feed3->source_string = "temp";
+    //load the an empty feed using aggregator_feed_load
+    $empty_feed = aggregator_feed_load($query_string);
+    $empty_feed->source_string = "empty";
+    //run update with the empty feed to fill it up
+    aggregator_refresh($empty_feed);
 
-    //run update with the empty feeds to fill it up
-    aggregator_refresh($empty_feed1);
-    aggregator_refresh($empty_feed2);
-    aggregator_refresh($empty_feed3);
+    $filled_feed = aggregator_feed_load($query_string);
+    //log on recent log messages
+    watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed->title));
+    }
+    else{
+    $query_string = db_select("SELECT fid FROM aggregator_feed")
+    ->range($init_counter,$init_counter)
+    ->execute();
 
-    $filled_feed1 = aggregator_feed_load($feed1);
-    $filled_feed2 = aggregator_feed_load($feed2);
-    $filled_feed3 = aggregator_feed_load($feed3);
-
+    //empty the first feed argument is fid.
+    $loaded_feed = aggregator_feed_load($query_string);
+    aggregator_remove($loaded_feed);
 
     //log on recent log messages
-    watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed1->title));
-    watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed2->title));
-    watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed3->title));
-    break;
+    watchdog('cws aggregator', 'Emptied Feed: %site.', array('%site' => $loaded_feed->title));
 
-  default:
-      watchdog('cws_aggregator', 'Found more than 3 aggregator feeds on this site!');
-      break;
+    //load the an empty feed using aggregator_feed_load
+    $empty_feed = aggregator_feed_load($query_string);
+    $empty_feed->source_string = "empty";
+    //run update with the empty feed to fill it up
+    aggregator_refresh($empty_feed);
 
-  } //END of Switch
-
-} //END of feedsToRun
-*/
+    $filled_feed = aggregator_feed_load($query_string);
+    //log on recent log messages
+    watchdog('cws aggregator', 'Filled Feed: %site.', array('%site' => $filled_feed->title));
+    }
+  }
